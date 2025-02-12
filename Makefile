@@ -13,7 +13,13 @@ clean: down
 	@$(DOCKER_COMPOSE) down --volumes --rmi all
 
 fclean: clean
-	rm -rf ./data
+	chown -Rv $(whoami):$(whoami) ./data/mariadb/* ./srcs/mariadb
+	chmod -R 755 ./data ./srcs/mariadb
+	rm -rf ./data ./srcs/mariadb
+	# chown -Rv $(whoami):$(whoami) ./data/mariadb/* ./srcs/mariadb
+	# chmod -R 755 ./data
+	# chmod -R 777 ./data/mariadb/mysql ./data/mariadb/performance_schema ./data/mariadb/sys ./data/mariadb/test
+	# rm -rf ./data ./srcs/mariadb
 
 re: fclean
 	make all
