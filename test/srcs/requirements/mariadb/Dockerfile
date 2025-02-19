@@ -2,12 +2,12 @@ FROM alpine:3.20.3
 
 RUN apk update && apk add mariadb mariadb-client
 
-COPY server.cnf /etc/my.cnf.d/server.cnf
-RUN chmod 644 /etc/my.cnf.d/server.cnf
+COPY mariadb-server.cnf /etc/my.cnf.d/mariadb-server.cnf
+RUN chmod 644 /etc/my.cnf.d/mariadb-server.cnf
 
-COPY m_entrypoint.sh /bin/m_entrypoint.sh
-RUN chmod +x /bin/m_entrypoint.sh
+COPY mariadb_setup.sh /bin/mariadb_setup.sh
+RUN chmod +x /bin/mariadb_setup.sh
 
-CMD ["m_entrypoint.sh"]
+CMD ["mariadb_setup.sh"]
 
 EXPOSE 3306
