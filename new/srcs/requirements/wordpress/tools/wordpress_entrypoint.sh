@@ -1,20 +1,17 @@
 #!/bin/bash
 
-echo "init"
-
-#cd /var/www/wp/
+echo "Changing to higher memory limit..."
 
 # Increase PHP memory limit
 echo "memory_limit = 512M" >> /etc/php83/php.ini
 
-echo "init 2"
-
+echo "Debug: -------"
 echo "DB_NAME=$DB_NAME"
 echo "DB_USER=$DB_USER"
 echo "DB_PWD=$DB_PWD"
 echo "DB_HOST=$DB_HOST"
+echo "--------------"
 
-   
 attempts=0
 while ! mariadb -h $DB_HOST -u$DB_USER -p$DB_PWD; do
 	attempts=$((attempts + 1))
@@ -27,14 +24,13 @@ while ! mariadb -h $DB_HOST -u$DB_USER -p$DB_PWD; do
 done
 echo "MariaDB connection established!"
 
-echo "--- Listing databases ---------"
+echo "Listing databases: -----------"
 mariadb -h$DB_HOST -u$DB_USER -p$DB_PWD $DB_NAME <<EOF
 SHOW DATABASES;
 EOF
+echo "------------------------------"
 
 cd /var/www/wp/
-
-echo "------------------------------"
 
 if [ ! -f wp-config.php ]; then
     echo "Downloading WordPress..."
@@ -51,16 +47,21 @@ else
     echo "WordPress already exists. Skipping download."
 fi
 
-echo "Installing wordpress..."
+echo "Checking if admin user $WP_ADMIN_USER already exists..."
+if wp user list --allow-root --path=/var/www/wp/ | grep -q "$WP_ADMIN_USER"; then
+    echo "Admin user $WP_ADMIN_USER already exists. Skipping admin creation."
+else
+    echo "Creating admin user..."
+    wp core install --allow-root \
+        --skip-email \
+        --url=$DOMAIN \
+        --title=$WP_TITLE \
+        --admin_user=$WP_ADMIN_USER \
+        --admin_password=$WP_ADMIN_PWD \
+        --admin_email=$WP_ADMIN_EMAIL \
+        --path=/var/www/wp/
+fi
 
-wp core install --allow-root \
-	--skip-email \
-	--url=$DOMAIN \
-	--title=$WP_TITLE \
-	--admin_user=$WP_ADMIN_USER \
-	--admin_password=$WP_ADMIN_PWD \
-	--admin_email=$WP_ADMIN_EMAIL \
-	--path=/var/www/wp/
 
 echo "Checking if user $WP_USER already exists..."
 if wp user list --allow-root --path=/var/www/wp/ | grep -q "$WP_USER"; then
