@@ -11,7 +11,7 @@ clean:
 	docker compose -f srcs/docker-compose.yml down --volumes --rmi all
 
 fclean: clean
-	sudo rm -rf ~/data
+	sudo rm -rf ~/data/
 	docker system prune --all --force --volumes
 	docker network prune --force
 	docker volume prune --force
